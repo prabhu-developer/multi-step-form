@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-step Form</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: linear-gradient(to right, #3ab5b0 0%, #3d99be 31%, #56317a 100%);
+            padding: 1rem;
+            background-image: linear-gradient(to right top, #051937, #004d7a, #008793, #00bf72, #a8eb12);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .stepper::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 2px;
+            width: 100%;
+            background: #e5e7eb;
+            z-index: 1;
+        }
+
+        .progress {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 2px;
+            background: #3b82f6;
+            transition: width 0.3s ease;
+            z-index: 2;
+        }
+
+        .step {
+            width: 2rem;
+            height: 2rem;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            color: #6b7280;
+            position: relative;
+            z-index: 3;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .step.completed {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .form-step h2 {
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        input[type=checkbox] {
+            display: inline;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        input.error,
+        select.error {
+            border-color: #ef4444;
+        }
+
+        .error-message {
+            display: none;
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        label[for="terms"],
+        input[type=checkbox] {
+            display: inline;
+            width: auto;
+        }
+
+        .btn-prev {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-prev:hover:not(:disabled) {
+            background: #d1d5db;
+        }
+
+        .btn-next {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        .success-message {
+            text-align: center;
+            display: none;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        .success-message h2 {
+            color: #059669;
+            margin-bottom: 1rem;
+        }
+
+        .success-message p {
+            color: #374151;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <h1>SignUp Form</h1>
+        <div class="stepper">
+            <div class="progress" id="progress"></div>
+            <div class="step active" data-step="1">1</div>
+            <div class="step" data-step="2">2</div>
+            <div class="step" data-step="3">3</div>
+        </div>
+
+        <form id="multiStepForm">
+            <div class="form-step active" data-step="1">
+                <h2>Personal Information</h2>
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required>
+                    <div class="error-message">Please enter your full name (minimum 3 characters)</div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                    <div class="error-message">Please enter a valid email address</div>
+                </div>
+                <div class="buttons">
+                    <button type="button" class="btn-prev" disabled>Previous</button>
+                    <button type="button" class="btn-next">Next</button>
+                </div>
+            </div>
+
+            <div class="form-step" data-step="2">
+                <h2>Contact Details</h2>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" required>
+                    <div class="error-message">Please enter a valid phone number</div>
+                </div>
+                <div class="form-group">
+                    <label for="country">Country</label>
+                    <select id="country" name="country" required>
+                        <option value="">Select a country</option>
+                        <option value="us">United States</option>
+                        <option value="uk">United Kingdom</option>
+                        <option value="ca">Canada</option>
+                        <option value="au">Australia</option>
+                    </select>
+                    <div class="error-message">Please select your country</div>
+                </div>
+                <div class="buttons">
+                    <button type="button" class="btn-prev">Previous</button>
+                    <button type="button" class="btn-next">Next</button>
+                </div>
+            </div>
+
+            <div class="form-step" data-step="3">
+                <h2>Additional Information</h2>
+                <div class="form-group">
+                    <label for="message">Additional Comments</label>
+                    <input type="text" id="message" name="message">
+                    <div class="error-message">Please keep your message under 500 characters</div>
+                </div>
+                <div class="form-group">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms">I agree to the terms and conditions</label>
+                    <div class="error-message">You must agree to the terms and conditions</div>
+                </div>
+                <div class="buttons">
+                    <button type="button" class="btn-prev">Previous</button>
+                    <button type="submit" class="btn-next">Submit</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="success-message">
+            <h2>Thank you!</h2>
+            <p>Your form has been successfully submitted.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('multiStepForm');
+            const steps = document.querySelectorAll('.step');
+            const formSteps = document.querySelectorAll('.form-step');
+            const progress = document.getElementById('progress');
+            const prevBtns = document.querySelectorAll('.btn-prev');
+            const nextBtns = document.querySelectorAll('.btn-next');
+            const successMessage = document.querySelector('.success-message');
+
+            let currentStep = 1;
+            updateProgress();
+
+            // Validation rules
+            const validationRules = {
+                name: {
+                    validate: (value) => value.trim().length >= 3,
+                    message: 'Please enter your full name (minimum 3 characters)'
+                },
+                email: {
+                    validate: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+                    message: 'Please enter a valid email address'
+                },
+                phone: {
+                    validate: (value) => /^\+?[\d\s-]{10,}$/.test(value),
+                    message: 'Please enter a valid phone number'
+                },
+                country: {
+                    validate: (value) => value !== '',
+                    message: 'Please select your country'
+                },
+                message: {
+                    validate: (value) => !value || value.length <= 500,
+                    message: 'Please keep your message under 500 characters'
+                },
+                terms: {
+                    validate: (value) => value === true,
+                    message: 'You must agree to the terms and conditions'
+                }
+            };
+
+            // Next button click handler
+            nextBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (validateStep(currentStep)) {
+                        if (btn.type === 'submit') {
+                            handleSubmit();
+                            return;
+                        }
+                        currentStep++;
+                        updateStep();
+                    }
+                });
+            });
+
+            // Previous button click handler
+            prevBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentStep--;
+                    updateStep();
+                });
+            });
+
+            // Form submit handler
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleSubmit();
+            });
+
+            function updateStep() {
+                // Update steps
+                steps.forEach(step => {
+                    const stepNum = parseInt(step.dataset.step);
+                    step.classList.remove('active', 'completed');
+                    if (stepNum === currentStep) {
+                        step.classList.add('active');
+                    } else if (stepNum < currentStep) {
+                        step.classList.add('completed');
+                    }
+                });
+
+                // Update form steps visibility
+                formSteps.forEach(step => {
+                    step.classList.remove('active');
+                    if (parseInt(step.dataset.step) === currentStep) {
+                        step.classList.add('active');
+                    }
+                });
+
+                // Update buttons
+                updateButtons();
+                // Update progress bar
+                updateProgress();
+            }
+
+            function updateButtons() {
+                // Update Previous button state
+                prevBtns.forEach(btn => {
+                    btn.disabled = currentStep === 1;
+                });
+            }
+
+            function updateProgress() {
+                const percent = ((currentStep - 1) / (steps.length - 1)) * 100;
+                progress.style.width = `${percent}%`;
+            }
+
+            function validateStep(step) {
+                const currentFormStep = document.querySelector(`.form-step[data-step="${step}"]`);
+                const inputs = currentFormStep.querySelectorAll('input[required], select[required], input[type="text"]');
+                let isValid = true;
+
+                inputs.forEach(input => {
+                    const rule = validationRules[input.name];
+                    if (rule) {
+                        const value = input.type === 'checkbox' ? input.checked : input.value;
+                        console.log(value, 'value', input)
+                        const isInputValid = rule.validate(value);
+                        const errorMessage = input.parentElement.querySelector('.error-message');
+
+                        if (!isInputValid) {
+                            isValid = false;
+                            input.classList.add('error');
+                            if (errorMessage) {
+                                errorMessage.classList.add('visible');
+                            }
+                        } else {
+                            input.classList.remove('error');
+                            if (errorMessage) {
+                                errorMessage.classList.remove('visible');
+                            }
+                        }
+                    }
+                });
+
+                return isValid;
+            }
+
+            function handleSubmit() {
+                if (validateStep(currentStep)) {
+                    form.style.display = 'none';
+                    successMessage.classList.add('active');
+                    // Here you would typically send the form data to a server
+                    console.log('Form submitted!', Object.fromEntries(new FormData(form)));
+                }
+            }
+
+            // Add input event listeners for real-time validation
+            form.querySelectorAll('input, select').forEach(input => {
+                input.addEventListener('input', () => {
+                    if (input.required || input.type === 'text') {
+                        const rule = validationRules[input.name];
+                        if (rule) {
+                            const value = input.type === 'checkbox' ? input.checked : input.value;
+                            const isValid = rule.validate(value);
+                            const errorMessage = input.parentElement.querySelector('.error-message');
+
+                            if (!isValid) {
+                                input.classList.add('error');
+                                if (errorMessage) {
+                                    errorMessage.classList.add('visible');
+                                }
+                            } else {
+                                input.classList.remove('error');
+                                if (errorMessage) {
+                                    errorMessage.classList.remove('visible');
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

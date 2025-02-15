@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mult step Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <form id="multiStepForm" method="post" novalidate class="p-3">
+        <!-- Step one -->
+        <fieldset class="card card-body">
+            <legend>User Information</legend>
+            <div class="p-2">
+                <label for="">Name</label>
+                <input type="text" name="userName" class="form-control" required>
+                <div class="text-danger error-message" id="userNameError"></div>
+            </div>
+            <div class="p-2">
+                <label for="">Email</label>
+                <input type="email" name="userEmail" class="form-control" required>
+                <div class="text-danger error-message" id="userEmailError"></div>
+            </div>
+        </fieldset>
+        <!-- Step one / -->
+
+        <!-- Step Two -->
+        <fieldset class="card card-body">
+            <legend>User Passwords</legend>
+            <div class="p-2">
+                <label for="">Confirm Password</label>
+                <input type="password" name="userConfirmPassword" class="form-control" required>
+                <div class="text-danger error-message" id="userConfirmPasswordError"></div>
+            </div>
+            <div class="p-2">
+                <label for="">Password</label>
+                <input type="password" name="userPassword" class="form-control" required>
+                <div class="text-danger error-message" id="userPasswordError"></div>
+            </div>
+        </fieldset>
+        <!-- Step Two / -->
+
+
+        <div class="mt-3">
+            <button onclick="handlePrevStep()" type="button" class="btn btn-light border">Prev</button>
+            <button onclick="handleNextStep()" type="button" class="btn btn-primary">Next</button>
+        </div>
+
+    </form>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
